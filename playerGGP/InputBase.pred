@@ -1,0 +1,16 @@
+"(<= 'input ('forall (role ?r) ('forall (input ?r ?m) ('storeset (input ?r ?m)))))"
+"(<= 'base ('forall (base ?x) ('storeset (base ?x))))"
+
+"(<= ('groundnot ?x) 'true)"
+
+"(<= (true ?x) (init ?x) ('ground ?x))"
+"(<= (true ?x) ('ground ?x))"
+"(<= (true ?x) (next ?x) ('ground ?x))"
+"(<= (does ?r ?m) ('ground ?r) ('ground ?m))"
+"(<= (does ?r ?m) (legal ?r ?m) ('ground ?r) ('ground ?m))"
+"(<= ('init ?x) (init ?x) ('ground ?x))"
+"(<= ('next ?x) (next ?x) ('ground ?x))"
+"(<= ('legal ?r ?m) (legal ?r ?m) ('ground ?r) ('ground ?m))"
+
+"(<= 'inputs ('forall (role ?r) ('forall ('legal ?r ?m) ('storeset (input ?r ?m)))))"
+"(<= 'bases ('forall ('init ?x) ('storeset (base ?x))) ('forall ('next ?y) ('storeset (base ?y))))"

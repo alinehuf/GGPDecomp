@@ -1,0 +1,8 @@
+"(<= ('groundnot ?x) ?x)"
+"(<= ('groundnot ?x) 'true)"
+
+"(<= (true ?x ?_) (base ?x))"
+"(<= (does ?r ?m ?_) (input ?r ?m))"
+"(<= 'init ('forall (init ?x ?_) ('storeset ?x)))"
+"(<= 'goals ('forall (role ?r ?_) ('forall (goal ?r ?x ?__) ('storeset (goal ?r ?x)))))"
+"(<= 'groundall ('forall (terminal ?_) 'true) ('forall (role ?r ?__) ('forall (legal ?r ?x ?___) 'true)) ('forall (next ?x ?____) 'true))"
