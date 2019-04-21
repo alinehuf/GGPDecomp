@@ -74,13 +74,9 @@
 		34DBE24B1A1BAC9600D6F1F7 /* YapTranslator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF4DF6091833D2E300A43811 /* YapTranslator.cpp */; };
 		34E2CABC1A2C9F2B00343F2E /* GateFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34E2CABA1A2C9F2B00343F2E /* GateFactory.cpp */; };
 		34E2D31A1A2CCD3C00343F2E /* Propnet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34E2D3181A2CCD3C00343F2E /* Propnet.cpp */; };
-		A40582732069402200BAF367 /* UctSinglePlayerDecomp2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A40582722069402200BAF367 /* UctSinglePlayerDecomp2.cpp */; };
-		A41FE1572087505E004C555C /* UctSinglePlayer3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A41FE1552087505E004C555C /* UctSinglePlayer3.cpp */; };
-		A41FE15A2087853C004C555C /* UctSinglePlayerDecompAndNormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A41FE1582087853C004C555C /* UctSinglePlayerDecompAndNormal.cpp */; };
-		A4398F76204D759300C96173 /* UctSinglePlayerBW.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4398F74204D759300C96173 /* UctSinglePlayerBW.cpp */; };
-		A4398F79204D9DB200C96173 /* UctSinglePlayerNodeLink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4398F78204D9DB200C96173 /* UctSinglePlayerNodeLink.cpp */; };
-		A43B78CF207001AA0069F09A /* UctSinglePlayer2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43B78CD207001AA0069F09A /* UctSinglePlayer2.cpp */; };
-		A4EAEEFA20430F07006DF26B /* UctSinglePlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4EAEEF820430F07006DF26B /* UctSinglePlayer.cpp */; };
+		A40582732069402200BAF367 /* UctSinglePlayerDecomp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A40582722069402200BAF367 /* UctSinglePlayerDecomp.cpp */; };
+		A4661CDC226327B10020C3EA /* UctSinglePlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4661CD8226230EA0020C3EA /* UctSinglePlayer.cpp */; };
+		A4661CDD22632C760020C3EA /* UctSinglePlayer2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4EAEEF820430F07006DF26B /* UctSinglePlayer2.cpp */; };
 		DF9651A01819088B00CB1A5F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF96519F1819088B00CB1A5F /* main.cpp */; };
 		DF9651AD18192BA400CB1A5F /* GdlFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF9651AB18192BA400CB1A5F /* GdlFactory.cpp */; };
 /* End PBXBuildFile section */
@@ -174,20 +170,12 @@
 		34E2CABB1A2C9F2B00343F2E /* GateFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GateFactory.h; sourceTree = "<group>"; };
 		34E2D3181A2CCD3C00343F2E /* Propnet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Propnet.cpp; sourceTree = "<group>"; };
 		34E2D3191A2CCD3C00343F2E /* Propnet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Propnet.h; sourceTree = "<group>"; };
-		A40582712069402200BAF367 /* UctSinglePlayerDecomp2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayerDecomp2.hpp; sourceTree = "<group>"; };
-		A40582722069402200BAF367 /* UctSinglePlayerDecomp2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayerDecomp2.cpp; sourceTree = "<group>"; };
-		A41FE1552087505E004C555C /* UctSinglePlayer3.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayer3.cpp; sourceTree = "<group>"; };
-		A41FE1562087505E004C555C /* UctSinglePlayer3.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayer3.hpp; sourceTree = "<group>"; };
-		A41FE1582087853C004C555C /* UctSinglePlayerDecompAndNormal.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayerDecompAndNormal.cpp; sourceTree = "<group>"; };
-		A41FE1592087853C004C555C /* UctSinglePlayerDecompAndNormal.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayerDecompAndNormal.hpp; sourceTree = "<group>"; };
-		A4398F74204D759300C96173 /* UctSinglePlayerBW.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayerBW.cpp; sourceTree = "<group>"; };
-		A4398F75204D759300C96173 /* UctSinglePlayerBW.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayerBW.hpp; sourceTree = "<group>"; };
-		A4398F77204D9C6000C96173 /* UctSinglePlayerNodeLink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayerNodeLink.hpp; sourceTree = "<group>"; };
-		A4398F78204D9DB200C96173 /* UctSinglePlayerNodeLink.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayerNodeLink.cpp; sourceTree = "<group>"; };
-		A43B78CD207001AA0069F09A /* UctSinglePlayer2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayer2.cpp; sourceTree = "<group>"; };
-		A43B78CE207001AA0069F09A /* UctSinglePlayer2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayer2.hpp; sourceTree = "<group>"; };
-		A4EAEEF820430F07006DF26B /* UctSinglePlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayer.cpp; sourceTree = "<group>"; };
-		A4EAEEF920430F07006DF26B /* UctSinglePlayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayer.hpp; sourceTree = "<group>"; };
+		A40582712069402200BAF367 /* UctSinglePlayerDecomp.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayerDecomp.hpp; sourceTree = "<group>"; };
+		A40582722069402200BAF367 /* UctSinglePlayerDecomp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayerDecomp.cpp; sourceTree = "<group>"; };
+		A4661CD8226230EA0020C3EA /* UctSinglePlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayer.cpp; sourceTree = "<group>"; };
+		A4661CD9226230EB0020C3EA /* UctSinglePlayer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayer.hpp; sourceTree = "<group>"; };
+		A4EAEEF820430F07006DF26B /* UctSinglePlayer2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UctSinglePlayer2.cpp; sourceTree = "<group>"; };
+		A4EAEEF920430F07006DF26B /* UctSinglePlayer2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UctSinglePlayer2.hpp; sourceTree = "<group>"; };
 		DF4DF6091833D2E300A43811 /* YapTranslator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YapTranslator.cpp; sourceTree = "<group>"; };
 		DF4DF60A1833D2E300A43811 /* YapTranslator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YapTranslator.h; sourceTree = "<group>"; };
 		DF96519C1819088B00CB1A5F /* playerGGP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = playerGGP; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -328,20 +316,12 @@
 			children = (
 				347A4EB81D0EA17300C76DF0 /* Splitter6.cpp */,
 				347A4EB91D0EA17300C76DF0 /* Splitter6.h */,
-				A4EAEEF820430F07006DF26B /* UctSinglePlayer.cpp */,
-				A4EAEEF920430F07006DF26B /* UctSinglePlayer.hpp */,
-				A43B78CD207001AA0069F09A /* UctSinglePlayer2.cpp */,
-				A43B78CE207001AA0069F09A /* UctSinglePlayer2.hpp */,
-				A41FE1552087505E004C555C /* UctSinglePlayer3.cpp */,
-				A41FE1562087505E004C555C /* UctSinglePlayer3.hpp */,
-				A4398F74204D759300C96173 /* UctSinglePlayerBW.cpp */,
-				A4398F75204D759300C96173 /* UctSinglePlayerBW.hpp */,
-				A4398F78204D9DB200C96173 /* UctSinglePlayerNodeLink.cpp */,
-				A4398F77204D9C6000C96173 /* UctSinglePlayerNodeLink.hpp */,
-				A40582722069402200BAF367 /* UctSinglePlayerDecomp2.cpp */,
-				A40582712069402200BAF367 /* UctSinglePlayerDecomp2.hpp */,
-				A41FE1582087853C004C555C /* UctSinglePlayerDecompAndNormal.cpp */,
-				A41FE1592087853C004C555C /* UctSinglePlayerDecompAndNormal.hpp */,
+				A4661CD8226230EA0020C3EA /* UctSinglePlayer.cpp */,
+				A4661CD9226230EB0020C3EA /* UctSinglePlayer.hpp */,
+				A4EAEEF820430F07006DF26B /* UctSinglePlayer2.cpp */,
+				A4EAEEF920430F07006DF26B /* UctSinglePlayer2.hpp */,
+				A40582722069402200BAF367 /* UctSinglePlayerDecomp.cpp */,
+				A40582712069402200BAF367 /* UctSinglePlayerDecomp.hpp */,
 			);
 			name = Decomposer;
 			sourceTree = "<group>";
@@ -466,7 +446,7 @@
 		DF9651941819088B00CB1A5F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = dex;
 				TargetAttributes = {
 					34160EF21AB829B30095C1A7 = {
@@ -485,6 +465,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = DF9651931819088B00CB1A5F;
@@ -573,16 +554,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A4661CDD22632C760020C3EA /* UctSinglePlayer2.cpp in Sources */,
+				A4661CDC226327B10020C3EA /* UctSinglePlayer.cpp in Sources */,
 				347A4EBA1D0EA17300C76DF0 /* Splitter6.cpp in Sources */,
 				3443C6121AC5E82900EADC44 /* Gate.cpp in Sources */,
-				A43B78CF207001AA0069F09A /* UctSinglePlayer2.cpp in Sources */,
-				A4EAEEFA20430F07006DF26B /* UctSinglePlayer.cpp in Sources */,
-				A40582732069402200BAF367 /* UctSinglePlayerDecomp2.cpp in Sources */,
+				A40582732069402200BAF367 /* UctSinglePlayerDecomp.cpp in Sources */,
 				3443C60F1AC5E71D00EADC44 /* Circuit.cpp in Sources */,
 				3407CB9A1A56FA9200669A24 /* IBFinder.cpp in Sources */,
 				34E2D31A1A2CCD3C00343F2E /* Propnet.cpp in Sources */,
 				34E2CABC1A2C9F2B00343F2E /* GateFactory.cpp in Sources */,
-				A41FE15A2087853C004C555C /* UctSinglePlayerDecompAndNormal.cpp in Sources */,
 				3407CBA21A56FDBD00669A24 /* YapData.cpp in Sources */,
 				34DBE24B1A1BAC9600D6F1F7 /* YapTranslator.cpp in Sources */,
 				345BCA571A1B6BA9006D9BBB /* SimpleTerm.cpp in Sources */,
@@ -590,12 +570,9 @@
 				345BCA5A1A1B8116006D9BBB /* Term.cpp in Sources */,
 				34160F0D1AB831120095C1A7 /* PropnetReasoner.cpp in Sources */,
 				DF9651AD18192BA400CB1A5F /* GdlFactory.cpp in Sources */,
-				A4398F76204D759300C96173 /* UctSinglePlayerBW.cpp in Sources */,
 				344E86591A20956600B7FDF1 /* GdlTools.cpp in Sources */,
 				DF9651A01819088B00CB1A5F /* main.cpp in Sources */,
-				A41FE1572087505E004C555C /* UctSinglePlayer3.cpp in Sources */,
 				3407CB9D1A56FB6300669A24 /* Grounder.cpp in Sources */,
-				A4398F79204D9DB200C96173 /* UctSinglePlayerNodeLink.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -771,12 +748,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -820,12 +799,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

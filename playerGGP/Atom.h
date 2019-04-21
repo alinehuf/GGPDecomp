@@ -30,19 +30,19 @@ public:
 //            return (hash < a.hash);
 //        return (name < a.name);
 //    }
-    //  inline int operator > (const Atom &a) const {
-    //    if(hash != a.hash)
-    //      return (hash > a.hash);
-    //    return (name > a.name);
-    //  }
-    //  inline int operator == (const Atom &a) const {
-    //    if(hash != a.hash)
-    //      return false;
-    //    return (name == a.name);
-    //  }
-    //  inline int operator != (const Atom &a) const {
-    //    return !operator==(a);
-    //  }
+//    inline int operator > (const Atom &a) const {
+//        if(hash != a.hash)
+//          return (hash > a.hash);
+//        return (name > a.name);
+//    }
+//    inline int operator == (const Atom &a) const {
+//        if(hash != a.hash)
+//          return false;
+//        return (name == a.name);
+//    }
+//    inline int operator != (const Atom &a) const {
+//        return !operator==(a);
+//    }
 };
 
 typedef const Atom * AtomPtr;

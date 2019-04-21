@@ -52,7 +52,7 @@ VectorTermPtr GdlFactory::computeGdlCode(const char * filename) {
     // open file
     std::ifstream in(filename, std::ios_base::in);
     if (!in) {
-        std::cerr << "Error: Could not open input file" << std::endl;
+        std::cerr << "Error: Could not open input file " << filename << std::endl;
         throw(errno);
     }
     in.unsetf(std::ios::skipws); // don't skip the white spaces. (skip by default)

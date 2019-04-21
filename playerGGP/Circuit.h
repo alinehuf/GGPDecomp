@@ -143,10 +143,6 @@ private:
     // choose the circuit and stratum where to place the gate and its id
     void markCircuitStratumAndId(const std::deque<GatePtr>& order);
     
-    
-    void setPosition(VectorBool& values, const VectorGatePtr& pos) const;
-    void setPosition(VectorBool& values, const SetTermPtr& pos) const;
-    
     void compute(Info::TypeCircuit type, VectorBool& values) const;
     void compute_not(const std::vector<OpNot>&, VectorBool& values) const;
     void compute_and(const std::vector<OpAnd>&, VectorBool& values) const;
@@ -198,7 +194,7 @@ private:
     void propagate3StatesCcl(const std::vector<OpOr>&, VectorBool& values) const;
 
     friend class Splitter6;
-    friend class UctSinglePlayerDecomp2;
+    friend class UctSinglePlayerDecomp;
 };
 
 

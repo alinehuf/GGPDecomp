@@ -12,10 +12,7 @@
 #include "Splitter6.h"
 #include "UctSinglePlayer.hpp"
 #include "UctSinglePlayer2.hpp"
-#include "UctSinglePlayer3.hpp"
-#include "UctSinglePlayerBW.hpp"
-#include "UctSinglePlayerDecomp2.hpp"
-#include "UctSinglePlayerDecompAndNormal.hpp"
+#include "UctSinglePlayerDecomp.hpp"
 #include "test_globals.h"
 #include <signal.h>
 #include <unistd.h>
@@ -63,13 +60,13 @@ void playDecomposeGdlFile(const char * filename) {
     // ----------
 
     int num_test = 100;
-    int itermax = 50000000;
+    int itermax = 1000000;
     pair<bool, int> result;
 
-    // TEST AVEC DECOMPOSITION 2 --------------------------------------------------------
-   out_time << "-----------------------------------------------------jeu avec decomposition" << endl;
+    // TEST AVEC DECOMPOSITION -------------------------------------------------------- MT-MCTS
+    out_time << "-----------------------------------------------------jeu avec decomposition" << endl;
     for (int n = 0; n < num_test; n++) {
-        cout << "test " << n+1 << " " << std::flush;
+        cout << "test " << n+1 << " " << endl;
         // TEST -----
         gettimeofday(&total_time_start, 0); // start timer
         gettimeofday (&time_start, 0);
@@ -84,7 +81,7 @@ void playDecomposeGdlFile(const char * filename) {
         gettimeofday (&time_start, 0);
         // ----------
 
-        UctSinglePlayerDecomp2 uct1(circuit, splitter1.subgamesTruesOnly());
+        UctSinglePlayerDecomp uct1(circuit, splitter1.subgamesTruesOnly());
         result = uct1.run(itermax);
 
         // TEST -----
@@ -93,7 +90,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct with decomp :                             solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct with decomp :                             fail" << endl;
+            out_time << "Uct with decomp :                             fail (" << itermax << ")" << endl;
         out_time << "Uct with decomp in                            ";
         out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
         out_time << "Uct with decomp total time :                  ";
@@ -109,37 +106,22 @@ void playDecomposeGdlFile(const char * filename) {
 #endif
     }
 
-    // TEST AVEC BLACK et WHITE LIST --------------------------------------------------
-    /*for (int n = 0; n < num_test; n++) {
-        cout << "test " << n+1 << " " << std::flush;
+    //TEST SANS DECOMPOSITION -------------------------------------------------------- UCT classique version 2
+    out_time << "-----------------------------------------------------UCT classique2" << endl;
+    for (int n = 0; n < num_test; n++) {
+        cout << "test " << n+1 << " " << endl;
         // TEST -----
         gettimeofday(&total_time_start, 0); // start timer
-        gettimeofday (&time_start, 0);
         // ----------
-
-        Splitter6 splitter2(circuit, propnet);
-
-        // TEST -----
-        gettimeofday (&time_end, 0);
-        out_time << "-----------------------------------------------------" << endl;
-        out_time << "Decomp in                                     ";
-        out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
-        gettimeofday (&time_start, 0);
-        // ----------
-
-        UctSinglePlayerBW uct2(circuit, splitter2.blackList(), splitter2.whiteList());
+        UctSinglePlayer2 uct2(circuit);
         result = uct2.run(itermax);
-
         // TEST -----
-        gettimeofday (&time_end, 0);
         gettimeofday(&total_time_end, 0); // get current time
         if (result.first)
-            out_time << "Uct with decomp :                             solved (" << result.second << ")" << endl;
+            out_time << "Uct without decomp :                          solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct with decomp :                             fail" << endl;
-        out_time << "Uct with decomp in                            ";
-        out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
-        out_time << "Uct with decomp total time :                  ";
+            out_time << "Uct without decomp :                          fail (" << itermax << ")" << endl;
+        out_time << "Uct without decomp total time :               ";
         out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
         // ----------
 #if PLAYERGGP_DEBUG
@@ -150,7 +132,7 @@ void playDecomposeGdlFile(const char * filename) {
         else
             printf("not solved after %d iterations - time %.2f s\n", result.second,  TIME_VALUE(total_time_start, total_time_end));
 #endif
-    }*/
+    }
 
     //TEST SANS DECOMPOSITION -------------------------------------------------------- UCT classique
     /*out_time << "-----------------------------------------------------UCT classique" << endl;
@@ -166,7 +148,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct without decomp :                          solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct without decomp :                          fail" << endl;
+            out_time << "Uct without decomp :                          fail (" << itermax << ")" << endl;
         out_time << "Uct without decomp total time :               ";
         out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
         // ----------
@@ -180,103 +162,6 @@ void playDecomposeGdlFile(const char * filename) {
 #endif
    }*/
 
-    // TEST SANS DECOMPOSITION 2 -------------------------------------------------------- arbre comme sous-jeu sans transpositions
-    /*for (int n = 0; n < num_test; n++) {
-    cout << "test " << n+1 << " " << std::flush;
-        // TEST -----
-        gettimeofday(&total_time_start, 0); // start timer
-        // ----------
-        UctSinglePlayer2 uct4(circuit);
-        result = uct4.run(itermax);
-        // TEST -----
-        gettimeofday(&total_time_end, 0); // get current time
-        if (result.first)
-            out_time << "Uct without decomp :                          solved (" << result.second << ")" << endl;
-        else
-            out_time << "Uct without decomp :                          fail" << endl;
-        out_time << "Uct without decomp total time :               ";
-        out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
-        // ----------
-#if PLAYERGGP_DEBUG
-        if (result.first) {
-            printf("solved after %d iterations - time %.2f s\n", result.second, TIME_VALUE(total_time_start, total_time_end));
-            uct4.printCurrent();
-        }
-        else
-            printf("not solved after %d iterations - time %.2f s\n", result.second,  TIME_VALUE(total_time_start, total_time_end));
-#endif
-   }*/
-
-    // TEST SANS DECOMPOSITION 3 -------------------------------------------------------- arbre comme sous-jeu + transpositions
-    /* out_time << "-----------------------------------------------------arbre comme sous-jeu + transpositions" << endl;
-    for (int n = 0; n < num_test; n++) {
-        cout << "test " << n+1 << " " << std::flush;
-        // TEST -----
-        gettimeofday(&total_time_start, 0); // start timer
-        // ----------
-        UctSinglePlayer3 uct5(circuit);
-        result = uct5.run(itermax);
-        // TEST -----
-        gettimeofday(&total_time_end, 0); // get current time
-        if (result.first)
-            out_time << "Uct without decomp :                          solved (" << result.second << ")" << endl;
-        else
-            out_time << "Uct without decomp :                          fail" << endl;
-        out_time << "Uct without decomp total time :               ";
-        out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
-        // ----------
-#if PLAYERGGP_DEBUG
-        if (result.first) {
-            printf("solved after %d iterations - time %.2f s\n", result.second, TIME_VALUE(total_time_start, total_time_end));
-            uct5.printCurrent();
-        }
-        else
-            printf("not solved after %d iterations - time %.2f s\n", result.second,  TIME_VALUE(total_time_start, total_time_end));
-#endif
-    }*/
-
-    // TEST AVEC DECOMPOSITION + ARBRE GLOBAL -------------------------------------------------------- debug : arbre global + sous-arbres
-    /*for (int n = 0; n < num_test; n++) {
-        cout << "test " << n+1 << " " << std::flush;
-        // TEST -----
-        gettimeofday(&total_time_start, 0); // start timer
-        gettimeofday (&time_start, 0);
-        // ----------
-
-        Splitter6 splitter2(circuit, propnet);
-
-        // TEST -----
-        gettimeofday (&time_end, 0);
-        out_time << "-----------------------------------------------------" << endl;
-        out_time << "Decomp in                                     ";
-        out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
-        gettimeofday (&time_start, 0);
-        // ----------
-
-        UctSinglePlayerDecompAndNormal uct6(circuit, splitter2.subgamesTruesOnly());
-        result = uct6.run(itermax);
-
-        // TEST -----
-        gettimeofday (&time_end, 0);
-        gettimeofday(&total_time_end, 0); // get current time
-        if (result.first)
-            out_time << "Uct with decomp :                             solved (" << result.second << ")" << endl;
-        else
-            out_time << "Uct with decomp :                             fail" << endl;
-        out_time << "Uct with decomp in                            ";
-        out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
-        out_time << "Uct with decomp total time :                  ";
-        out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
-        // ----------
-#if PLAYERGGP_DEBUG == 2
-        if (result.first) {
-            printf("solved after %d iterations - time %.2f s\n", result.second, TIME_VALUE(total_time_start, total_time_end));
-            uct6.printCurrent();
-        }
-        else
-            printf("not solved after %d iterations - time %.2f s\n", result.second,  TIME_VALUE(total_time_start, total_time_end));
-#endif
-    }*/
     cout << endl;
 
     // TEST -----
@@ -300,33 +185,68 @@ int main(int argc, const char * argv[]) {
     string stanford(user_home + "FAC/TH3_ggp.org_games/stanford/");
     string dresden(user_home + "FAC/TH3_ggp.org_games/dresden/");
 
+    // solitaires en série
+//    playDecomposeGdlFile((base + "brain_teaser_extended_v0.kif").c_str());               // PAS DECOMPOSÉ (STEPPER + 2 SJ EN UN)
+//    playDecomposeGdlFile((dresden + "brain_teaser_extended_v0.kif").c_str());            // PAS DECOMPOSÉ (STEPPER + 2 SJ EN UN)
+//    playDecomposeGdlFile((base + "asteroidsSerial_v1.kif").c_str());                     // IDEM v0
+//    playDecomposeGdlFile((dresden + "asteroidsserial_v0.kif").c_str());                  // IDEM base v0
+//    playDecomposeGdlFile((base + "blocksWorldSerial_v1.kif").c_str());                   // IDEM v0
+//    playDecomposeGdlFile((dresden + "blocksworldserial_v0.kif").c_str());                // IDEM base v0
+//    playDecomposeGdlFile((base + "factoringGeorgeForman_v0.kif").c_str());               // PAS DECOMPOSÉ
+//    playDecomposeGdlFile((base + "factoringMutuallyAssuredDestruction_v0.kif").c_str()); // PAS DECOMPOSÉ
+//    playDecomposeGdlFile((base + "blocksWorldSerial_v0.kif").c_str());
+    playDecomposeGdlFile((test + "blocksWorldSerialMedium.kif").c_str());
+//    playDecomposeGdlFile((base + "asteroidsSerial_v0.kif").c_str());
+//    playDecomposeGdlFile((base + "factoringEasyTurtleBrain_v0.kif").c_str());
+//    playDecomposeGdlFile((base + "factoringMediumTurtleBrain_v0.kif").c_str());
+//    playDecomposeGdlFile((base + "factoringImpossibleTurtleBrain_v0.kif").c_str());
 
+
+
+
+
+//    playDecomposeGdlFile((test + "double_blocks_world.kif").c_str());
+//    playDecomposeGdlFile((test + "double_blocks_world_medium.kif").c_str());
+//    playDecomposeGdlFile((test + "double_blocks_world_small.kif").c_str());
+//    playDecomposeGdlFile((test + "double_blocks_world_very_small.kif").c_str());
+//    playDecomposeGdlFile((test + "double_maze.kif").c_str());
+
+
+//    playDecomposeGdlFile((base + "lightsOnSimul4_v0.kif").c_str());        // RESOLU EN 1 à 3 PLAYOUTS !!!
+//    playDecomposeGdlFile((base + "lightsOnSimultaneous_v0.kif").c_str());  // RESOLU EN 1 à 3 PLAYOUTS !!!
 
 //    playDecomposeGdlFile((base + "futoshiki4_v0.kif").c_str());
 //    playDecomposeGdlFile((stanford + "selectivesukoshi_v0.kif").c_str());
 //    playDecomposeGdlFile((base + "queens08lg_v0.kif").c_str());
-//
-    playDecomposeGdlFile((base + "incredible_v0.kif").c_str());
-//
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_1.kif").c_str()); // G 14sj
-    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_6.kif").c_str()); // max decomposable 22sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_4.kif").c_str()); // 13sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_3.kif").c_str()); // 12sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_2.kif").c_str()); // 11sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_5.kif").c_str()); // 10sj
 
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_3.kif").c_str()); // max decomposable 33sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_1.kif").c_str()); // 22sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_2.kif").c_str()); // 16sj
 
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_4.kif").c_str()); // max decomposable 61sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_3.kif").c_str()); // 37sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_1.kif").c_str()); // cheval 12sj
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_2.kif").c_str()); // 10sj
+//    playDecomposeGdlFile((test + "blocksWorldParallelMedium.kif").c_str()); // ABCDE score monotonique
+//    playDecomposeGdlFile((base + "blocksWorldParallel_v0.kif").c_str()); // very small
+
+//    playDecomposeGdlFile((base + "incredible_v0.kif").c_str());
+
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_1.kif").c_str()); // 14sj - G
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_6.kif").c_str()); // 22sj - damier
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_4.kif").c_str()); // 13sj - tetris
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_3.kif").c_str()); // 12sj - chien assis
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_2.kif").c_str()); // 11sj - iG
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_5.kif").c_str()); // 10sj - sorciere
+//
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_3.kif").c_str()); // 33sj - damier clos
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_1.kif").c_str()); // 22sj - cube
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_2.kif").c_str()); // 16sj - canard
+
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_4.kif").c_str()); // 61sj - grand damier
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_3.kif").c_str()); // 37sj - halloween
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_1.kif").c_str()); // 12sj - cheval
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_2.kif").c_str()); // 10sj - chaos
+
+
+//    playDecomposeGdlFile((stanford + "multiplehamilton_v0.kif").c_str());
+//    playDecomposeGdlFile((stanford + "multiplesukoshi_v0.kif").c_str());
 
 //    playDecomposeGdlFile((base + "asteroidsParallel_v1.kif").c_str());
-
-
+//    playDecomposeGdlFile((base + "factoringMutuallyAssuredDestruction_v0.kif").c_str());
 
 //    playDecomposeGdlFile((base + "ruleDepthLinear_v0.kif").c_str());
 //    playDecomposeGdlFile((dresden + "ruledepthlinear_v0.kif").c_str());

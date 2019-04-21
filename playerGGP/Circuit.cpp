@@ -324,34 +324,16 @@ void Circuit::markCircuitStratumAndId(const std::deque<GatePtr>& order) {
  ******************************************************************************/
 
 /* set a position */
-void Circuit::setPosition(VectorBool& values, const VectorGatePtr& pos) const {
-    memset(values.data() + infos.id_true, BOOL_F, (infos.id_does.back() - infos.id_true) * sizeof(values.front()));
-    values[0] = BOOL_T;
-    for (GatePtr g : pos) {
-        if (g->getId() <= values.size()) {
-            values[g->getId()] = BOOL_T;
-        }
-    }
-}
-void Circuit::setPosition(VectorBool& values, const SetTermPtr& pos) const {
-    memset(values.data() + infos.id_true, BOOL_F, (infos.id_does.back() - infos.id_true) * sizeof(values.front()));
-    values[0] = BOOL_T;
-    for (TermPtr t : pos) {
-        auto it = infos.inv_vars.find(t);
-        if (it != infos.inv_vars.end()) {
-            values[it->second] = BOOL_T;
-        }
-    }
-}
 void Circuit::setPosition(VectorBool& values, const VectorTermPtr& pos) const {
-    memset(values.data() + infos.id_true, BOOL_F, (infos.id_does.back() - infos.id_true) * sizeof(values.front()));
-    values[0] = BOOL_T;
+    memset(values.data() + infos.id_true, 0, (infos.id_does.front() - infos.id_true) * sizeof(values.front()));
+    values[0] = -1; // au cas où...
     for (TermPtr t : pos) {
         auto it = infos.inv_vars.find(t);
         if (it != infos.inv_vars.end()) {
-            values[it->second] = BOOL_T;
+            values[it->second] = -1;
         }
     }
+    //terminal_legal_goal(values); // supprimé pour diffuser le signal avec logique tri-valuée pendant la décomposiiton
 }
 
 const VectorTermPtr& Circuit::getInitPos() const {
@@ -372,10 +354,13 @@ const VectorTermPtr& Circuit::getPosition(const VectorBool& values) const {
 }
 
 void Circuit::playout(VectorBool& values) {
+//    int count = 0;
     vector<size_t> legals(infos.id_next - infos.id_legal[0]);
     int diff = (int) (infos.id_does[0] - infos.id_legal[0]);
     goals.assign(goals.size(), 0);
     for(;;) {
+//        cout << "step=" << ++count << endl;
+//        printTrueValues(values);
         compute(Info::TERMINAL, values);
         if (values[infos.id_terminal]) break;
         
@@ -390,7 +375,7 @@ void Circuit::playout(VectorBool& values) {
                 terminal = -1;
                 return;
             }
-            values[diff + legals[rand_gen() % legals.size()]] = BOOL_T;
+            values[diff + legals[rand_gen() % legals.size()]] = -1;
         }
         compute(Info::NEXT, values);
         memcpy(values.data() + infos.id_true, values.data() + infos.id_next, (infos.id_does.front() - infos.id_true) * sizeof(values.front()));
@@ -446,14 +431,25 @@ void Circuit::setMove(VectorBool& values, TermPtr move) const {
     auto it = infos.inv_vars.find(move);
     if(it == infos.inv_vars.end())
         cerr << *move << " is not legal.";
-    values[it->second] = BOOL_T;
+    values[it->second] = -1;
 }
 
 void Circuit::next(VectorBool& values) {
+//    cout << "before next" << endl;
+//    printTrueValues(values);
     compute(Info::NEXT, values);
+//    cout << "after next" << endl;
+//    printTrueValues(values);
     memcpy(values.data() + infos.id_true, values.data() + infos.id_next, (infos.id_does.front() - infos.id_true) * sizeof(values.front()));
+//    cout << "after copy on trues" << endl;
+//    printTrueValues(values);
     memset(values.data() + infos.id_does.front(), 0, (infos.id_does.back() - infos.id_does.front()) * sizeof(values.front()));
+//    cout << "after erase does" << endl;
+//    printTrueValues(values);
     terminal_legal_goal(values);
+//    cout << "after terminal legal goal" << endl;
+//    printTrueValues(values);
+//    cout << endl;
 }
 
 Score Circuit::getGoal(const VectorBool& values, TermPtr role) const {

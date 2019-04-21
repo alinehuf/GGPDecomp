@@ -23,6 +23,46 @@ using std::stringstream;
 using std::ofstream;
 
 /*******************************************************************************
+ *      Node
+ ******************************************************************************/
+
+Node::Node(const VectorTermPtr& p, size_t h, const VectorTermPtr& moves) : pos(p), hash(h), visits(0), nb_fully_explored(0) {
+    // initialiser les liens
+    childs.resize(moves.size());
+    for (size_t i = 0; i < childs.size(); i++)
+        childs[i].move = moves[i];
+}
+
+size_t Node::computeHash(VectorTermPtr p) {
+    std::sort(p.begin(), p.end(), [](TermPtr x, TermPtr y){ return *x < *y; });
+    size_t h = 0;
+    int i = 1;
+    for (TermPtr e : p) {
+        h ^= e->getHash() * i;
+        i += 2;
+    }
+    return h * 11;
+}
+
+// méthode pour imprimer un noeud
+std::ostream& operator<<(std::ostream& out, const Node& n) {
+    out << "position (" << n.hash << "): ";
+    for (TermPtr e : n.pos)
+        out << *e << " ";
+    out << endl;
+    out << "visits: " << n.visits << " (fully_explored=" << n.nb_fully_explored << ")" << endl;
+    out << "childs:" << endl;
+    for (const Link& l : n.childs) {
+        out << "move: ";
+        if (l.move != nullptr) out << *l.move;
+        else out << "-";
+        out << " (visits=" << l.visits << " sum_score=" << l.sum_score << " fully_explored=" << l.fully_explored << ")";
+        out << endl;
+    }
+    return out;
+}
+
+/*******************************************************************************
  *      UctSinglePlayer
  ******************************************************************************/
 
@@ -39,6 +79,7 @@ UctSinglePlayer::UctSinglePlayer(Circuit& circ, float c)
     VectorTermPtr current_pos = circuit.getPosition(current);
     root = new Node(current_pos, Node::computeHash(current_pos), legal); // creation du noeud racine
     transpo[root->hash] = root;
+    current_debug = current;
 }
 
 
@@ -71,6 +112,7 @@ pair<bool, int> UctSinglePlayer::run(int itermax) {
             cout << "-------------------------best moves :" << endl;
             NodePtr n = root;
             circuit.setPosition(current, root->pos);
+            circuit.terminal_legal_goal(current);
             while (n->childs.size() > 0) {
                 TermPtr best = nullptr;
                 float best_eval = -1;
@@ -107,6 +149,8 @@ void UctSinglePlayer::printCurrent() {
 void UctSinglePlayer::selection() {
     while(true) {
         circuit.setPosition(current, root->pos);
+//        current_debug = current;
+        circuit.terminal_legal_goal(current);
         descent_nptr.clear();
         descent_mid.clear();
         if (selection(root)) break;
@@ -163,6 +207,15 @@ bool UctSinglePlayer::selection(NodePtr cnode) {
     //    cout << "meilleurs coup: " << *cnode->childs[best_id].move << endl;
     circuit.setMove(current, cnode->childs[best_id].move);
     circuit.next(current);
+
+    // debug
+//    circuit.setMove(current_debug, cnode->childs[best_id].move);
+//    circuit.next(current_debug);
+//    VectorBool next_current(current.begin() + circuit.getInfos().id_next, current.begin() + circuit.getInfos().id_goal.front());
+//    VectorBool next_current_debug(current_debug.begin() + circuit.getInfos().id_next, current_debug.begin() + circuit.getInfos().id_goal.front());
+//    if( next_current != next_current_debug ) cout << "current_iter=" << current_iter << endl;
+//    assert( next_current == next_current_debug );
+
     VectorTermPtr new_pos =  circuit.getPosition(current);
     size_t new_hash = Node::computeHash(new_pos);
     auto it = transpo.find(new_hash);
@@ -195,7 +248,7 @@ void UctSinglePlayer::expansion() {
             rmove--;
         }
     }
-    // on note l'enfant selectionné
+    // on note l'enfant selectionnéx
     descent_mid.push_back(expansion_id);
     // on joue le coup et on l'ajoute à la descente
     circuit.setMove(current, cnode->childs[expansion_id].move);
@@ -280,6 +333,7 @@ string UctSinglePlayer::graphvizRepr(const string& name) const {
         for (Link c : n->childs) {
             VectorBool values(circuit.getInfos().values_size, BOOL_F);
             circuit.setPosition(values, n->pos);
+            circuit.terminal_legal_goal(values);
             circuit.setMove(values, c.move);
             circuit.next(values);
             size_t hash = Node::computeHash(circuit.getPosition(values));

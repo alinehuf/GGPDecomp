@@ -10,8 +10,43 @@
 #define UctSinglePlayer_hpp
 
 #include "Circuit.h"
-#include "UctSinglePlayerNodeLink.hpp"
 #include <unordered_map>
+
+class Link;
+class Node;
+typedef Link * LinkPtr;
+typedef Node * NodePtr;
+
+class Link {
+public:
+    Link() : move(nullptr), visits(0), sum_score(0), fully_explored(false) {};
+private:
+    TermPtr move;
+    size_t visits;
+    size_t sum_score;
+    bool fully_explored;
+
+    friend std::ostream& operator<<(std::ostream& out, const Node& t);
+    friend class Node;
+    friend class UctSinglePlayer;
+    friend class UctSinglePlayerBW;
+};
+
+class Node {
+    Node(const VectorTermPtr& pos, size_t hash, const VectorTermPtr& moves);
+    static size_t computeHash(VectorTermPtr p);
+private:
+    const VectorTermPtr pos;
+    size_t hash;
+    size_t visits;
+    size_t nb_fully_explored;
+    std::vector<Link> childs;
+
+    friend std::ostream& operator<<(std::ostream& out, const Node& t);
+    friend class UctSinglePlayer;
+    friend class UctSinglePlayerBW;
+};
+
 
 class UctSinglePlayer {
 public:
@@ -39,6 +74,7 @@ private:
 
     NodePtr root;
     VectorBool current;
+    VectorBool current_debug;
     std::vector<NodePtr> descent_nptr;
     std::vector<int> descent_mid;
     std::unordered_map<size_t, NodePtr> transpo;

@@ -615,7 +615,6 @@ void GateFactory::createGraphvizFile(const string& name) const {
     }
     fp << graphvizRepr(name);
     fp.close();
-    
     cout << "graphviz .gv file created, can't create the .ps file ";
     cout << "myself, use this to create .ps file :" << endl;
     cout << "dot -Tps ";
