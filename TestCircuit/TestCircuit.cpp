@@ -15,7 +15,7 @@ void testCircuitStepByStep(const char * filename) {
     cout << "Game: " << filename << endl;
     GdlFactory factory;
     VectorTermPtr gdlCode = factory.computeGdlCode(filename);
-    factory.printGdlCode(cout, gdlCode);
+//    factory.printGdlCode(cout, gdlCode);
 
     
     Grounder grounder(factory, gdlCode);
@@ -167,11 +167,7 @@ int main(int argc, const char * argv[]) {
     //testCircuitStepByStep((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_3.kif").c_str());
 //    testCircuitStepByStep((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nurikabe_5x5_1.kif").c_str());
 //    testCircuitStepByStep((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/puzzleloop_5x5_1.kif").c_str());
-//    testCircuitStepByStep((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_monotone_1.kif").c_str());
-
-
-    testCircuitStepByStep((user_home + "FAC/TH2_PlayerGGP/_DEBUG_jeux_tests/double_blocks_world_medium.kif").c_str());
-//    testCircuitStepByStep((user_home + "FAC/TH2_PlayerGGP/_DEBUG_jeux_tests/double_maze.kif").c_str());
+    testCircuitStepByStep((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_monotone_1.kif").c_str());
 
     return EXIT_SUCCESS;
 }

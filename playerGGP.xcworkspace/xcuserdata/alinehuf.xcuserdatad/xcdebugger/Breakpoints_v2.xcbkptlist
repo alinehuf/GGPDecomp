@@ -10,7 +10,23 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "playerGGP/UctSinglePlayerDecompAndNormal.cpp"
-            timestampString = "561300201.133701"
+            timestampString = "546082401.247929"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "452"
+            endingLineNumber = "452"
+            landmarkName = "UctSinglePlayerDecompAndNormal::selection(vector&lt;Node4Ptr&gt; cnode, Node4Ptr node, int i)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "playerGGP/UctSinglePlayerDecompAndNormal.cpp"
+            timestampString = "546082401.248001"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "73"
@@ -26,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "playerGGP/UctSinglePlayerDecompAndNormal.cpp"
-            timestampString = "561300201.133797"
+            timestampString = "546082401.2480561"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "437"
@@ -41,13 +57,77 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "playerGGP/UctSinglePlayerDecompAndNormal.cpp"
-            timestampString = "562797214.7913311"
+            filePath = "playerGGP/UctSinglePlayerDecomp2.cpp"
+            timestampString = "562966673.606429"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "452"
-            endingLineNumber = "452"
-            landmarkName = "UctSinglePlayerDecompAndNormal::selection(vector&lt;Node4Ptr&gt; cnode, Node4Ptr node, int i)"
+            startingLineNumber = "100"
+            endingLineNumber = "100"
+            landmarkName = "SubNode::getChild(TermPtr move)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "playerGGP/UctSinglePlayerDecomp2.cpp"
+            timestampString = "562966673.606987"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "483"
+            endingLineNumber = "483"
+            landmarkName = "UctSinglePlayerDecomp2::selection(vector&lt;SubNodePtr&gt; cnode)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "playerGGP/UctSinglePlayerDecomp2.cpp"
+            timestampString = "562966673.607219"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "148"
+            endingLineNumber = "148"
+            landmarkName = "SubNode::noteMoveResult(TermPtr move, SetTermPtr&amp;&amp; pos, size_t depth, bool term, std::unordered_map&lt;size_t, SubNodePtr&gt;&amp; transpo)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "playerGGP/UctSinglePlayerDecomp2.cpp"
+            timestampString = "562966673.607448"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "364"
+            endingLineNumber = "364"
+            landmarkName = "UctSinglePlayerDecomp2::selection(vector&lt;SubNodePtr&gt; cnode)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "playerGGP/UctSinglePlayerDecomp2.cpp"
+            timestampString = "562966673.607689"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "466"
+            endingLineNumber = "466"
+            landmarkName = "UctSinglePlayerDecomp2::selection(vector&lt;SubNodePtr&gt; cnode)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

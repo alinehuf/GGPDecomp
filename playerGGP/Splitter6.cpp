@@ -57,7 +57,7 @@ Splitter6::Splitter6(Circuit& circ, Propnet& prop) : circuit(circ), c_infos(circ
     findDoesPrecondInNext();
     //printDoesPrecondInNext(cout);
     getCondVictory();         // find subgoals and goals
-    //printCondVictory(*out_dcmp);
+//    printCondVictory(*out_dcmp);
 
     // initialiser les structures pour collecter les données sur chaque joint move
     in_joint_moves.resize(nb_inputs);

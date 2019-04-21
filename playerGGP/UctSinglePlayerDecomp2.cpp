@@ -33,22 +33,22 @@ using std::ofstream;
 ostream& operator<<(ostream& out, const SubLink& l) {
     out << "\tNi=" << l.visits << " \tWi=" << l.sum_score << " \tWi_min=" << l.sum_min << " \tWi_max=" << l.sum_max << " \tnext_node" << l.next_node << " \tmoves=[ ";
     for (const auto& entry : l.moves_explored)
-        out << *entry.first << (((entry.second & SubLink::EXPLORED) == SubLink::EXPLORED)?"* ":" ");
+        out << *entry.first << ((entry.second)?"* ":" ");
     out << "]" << endl;
     return out;
 }
 
 bool SubLink::fullyExplored(SetTermPtr legal) {
-    for (auto& entry : this->moves_explored)
-        if (legal.find(entry.first) != legal.end() && (entry.second & SubLink::EXPLORED) != SubLink::EXPLORED)
+    for (auto& move_entry : this->moves_explored)
+        if (legal.find(move_entry.first) != legal.end() && !move_entry.second)
             return false;
     return true;
 }
 
 int SubLink::nbFullyExplored() {
     int count = 0;
-    for (auto& entry : this->moves_explored)
-        if ((entry.second & SubLink::EXPLORED) == SubLink::EXPLORED)
+    for (auto& move_entry : this->moves_explored)
+        if (move_entry.second)
             ++count;
     return count;
 }
@@ -97,7 +97,7 @@ SubLinkPtr SubNode::getChild(TermPtr move) const {
     for (SubLinkPtr c : childs)
         if (c->moves_explored.find(move) != c->moves_explored.end()) return c;
     cerr << "[getChild] enfant non trouvé !" << endl;
-    assert(false);
+    exit(1);
 }
 
 SetTermPtr SubNode::getUnexplored(const VectorTermPtr& legals) {
@@ -111,41 +111,28 @@ SetTermPtr SubNode::getUnexplored(const VectorTermPtr& legals) {
     return unexplored;
 }
 
-SubNodePtr SubNode::noteMoveResult(TermPtr move, SetTermPtr&& pos, size_t depth, bool term, std::unordered_map<size_t, SubNodePtr>& transpo, size_t& update_d) {
+SubNodePtr SubNode::noteMoveResult(TermPtr move, SetTermPtr&& pos, size_t depth, bool term, std::unordered_map<size_t, SubNodePtr>& transpo) {
     childs_moves.insert(move);
     // next position already known ?
     for (SubLinkPtr c : childs) {
         if (pos == c->next_node->pos) {
             auto it = c->moves_explored.find(move);
-            if (term) { // action menant à une position terminale
-                // si cette actions est terminale et qu'on l'explore pour la première fois, on le note
-                if (it == c->moves_explored.end()) c->moves_explored[move] = SubLink::TERMINAL;
-                // si cette actions est connue et qu'elle est terminale cette fois: on ajoute le flag "parfois terminal"
-                // (ça change rien si elle était déjà toujours ou parfois terminale)
-                else it->second |= SubLink::SOMETIME_TERMINAL;
-            }
-            // l'action n'est pas terminale ici
-            else {
-                // la position suivante était notée terminale (pour cette action ou une autre) mais elle ne l'est pas cette fois: on l'indique
-                if (c->next_node->terminal) {
+            if (c->next_node->terminal) {
+                // cette position est bien terminale, l'action est terminale
+                if (term) c->moves_explored[move] = true;
+                // cette position s'avère ne pas être toujours terminale finalement
+                else {
                     c->next_node->terminal = false;
-                    update_d = depth-1;
+                    c->moves_explored[move] = false;
                 }
-                if (it == c->moves_explored.end()) {
-                    // si la transition était totalement explorée, on rétropropage la mise à jour
-                    // (à faire avant d'ajouter l'action)
-                    if (c->nbFullyExplored() == c->moves_explored.size()) // TODO : voir si le test perd pas plus de temps que rétro-propager systématiquement
-                        update_d = depth-1;
-                    c->moves_explored[move] = SubLink::TO_EXPLORE;
-                } else if (it->second == SubLink::TERMINAL) {
-                    // si la transition était totalement explorée, on rétropropage la mise à jour du marquage
-                    // (à faire avant de modifier le marquage de l'action)
-                    if (c->nbFullyExplored() == c->moves_explored.size()) // TODO : idem précédent
-                        update_d = depth-1;
-                    c->moves_explored[move] = SubLink::SOMETIME_TERMINAL;
-                }
-                assert(c->moves_explored.at(move) != SubLink::TERMINAL && !c->next_node->terminal);
             }
+            // cette position est déjà connue non terminale
+            else if (it == c->moves_explored.end()) c->moves_explored[move] = false;
+            // TODO : quand une transition est testée et qu'elle n'est pas terminale,
+            // puis on teste la même transition avec une action terminale, peut-on marquer cette action terminale
+            // avec un espoir de réviser le marquage par la suite si on s'est trompé ?
+//            else if (it == c->moves_explored.end() && term) c->moves_explored[move] = true; // BUGG
+//            else if (!term) c->moves_explored[move] = false; //BUGG
             return nullptr;
         }
     }
@@ -158,25 +145,19 @@ SubNodePtr SubNode::noteMoveResult(TermPtr move, SetTermPtr&& pos, size_t depth,
     if (it != transpo.end()) {
         if (it->second->pos != pos || it->second->depth != depth) {
             cerr << "[noteMoveResult] different positions with same hash" << endl;
-            assert(it->second->pos == pos && it->second->depth == depth);
+            exit(1);
         }
         n = it->second;
         // cette position s'avère ne pas être toujours terminale finalement
-        if (!term) n->terminal = false;
+        if (n->terminal && !term) n->terminal = false;
     } else {
-        n = new SubNode(std::move(pos), depth, hash, term); // position terminale si term
+        n = new SubNode(std::move(pos), depth, computeHash(pos, depth), term);
         transpo[hash] = n;
     }
     c = new SubLink(move, n);
     childs.push_back(c);
-    // si terminal on indique que l'action est terminale (rien de nouveau à explorer)
-    if (term) c->moves_explored[move] = SubLink::TERMINAL;
-    // je sais pas si la transition entrante était totalement explorée ou pas, dans le doute on rétropropage puisque la position suivante n'est pas terminale
-    else {
-        update_d = depth-1;
-        assert(c->moves_explored.at(move) == SubLink::TO_EXPLORE);
-        assert(n->terminal == false);
-    }
+    // si terminal on indique que l'action est déjà complètement exploré
+    if (term) c->moves_explored[move] = true;
 
     return n;
 }
@@ -185,12 +166,10 @@ SubNodePtr SubNode::noteMoveResult(TermPtr move, SetTermPtr&& pos, size_t depth,
  *      UctSinglePlayerDecomp2 - Constructeur
  ******************************************************************************/
 
-UctSinglePlayerDecomp2::UctSinglePlayerDecomp2(Circuit& circ, vector<unordered_set<TermPtr>>&& sg_trues, float c, float e)
+UctSinglePlayerDecomp2::UctSinglePlayerDecomp2(Circuit& circ, vector<unordered_set<TermPtr>>&& sg_trues, float c)
 : circuit(circ), subgames_trues(std::forward<vector<unordered_set<TermPtr>>>(sg_trues)), transpo(subgames_trues.size()), uct_const(c),
-  role(circuit.getRoles()[0]), rand_gen((std::random_device()).operator()()), proba(0.0, 1.0), explored_choice(e),
-  subgame_terminal(subgames_trues.size(), false), subgame_fully_explored(subgames_trues.size(), false), nb_fully_explored(0),
-  solution_found(false), found(0), update_depth(subgames_trues.size(), 0), transpo_without_step(subgames_trues.size()),
-  all_fully_explored(false)
+  role(circuit.getRoles()[0]), rand_gen((std::random_device()).operator()()), subgame_terminal(subgames_trues.size(), false),
+  subgame_fully_explored(subgames_trues.size(), false), nb_fully_explored(0), solution_found(false), found(0)
   //subgame_solved(subgames_trues.size(), false),  nb_solved(0), found(0),
 {
 #if PLAYERGGP_DEBUG == 2
@@ -249,8 +228,7 @@ pair<bool, int> UctSinglePlayerDecomp2::run(int itermax) {
     // lance uct
     for(iter_now = 1; iter_now <= itermax; iter_now++) {
         std::vector<std::vector<float>> scores = selection_expansion();
-        if (scores.empty())
-            simul_backprop();
+        if (scores.empty()) simul_backprop();
         else backprop(scores);
 
 #if PLAYERGGP_DEBUG == 2
@@ -331,7 +309,6 @@ vector<vector<float>> UctSinglePlayerDecomp2::selection_expansion() {
         descent_node.clear();
         descent_link.clear();
         descent_move.clear();
-        memset(update_depth.data(), 0, sizeof(update_depth.front()) * update_depth.size());
         return selection(root);
     }
 }
@@ -355,88 +332,26 @@ vector<vector<float>> UctSinglePlayerDecomp2::selection(vector<SubNodePtr> cnode
 
         // pas d'expansion, on connaissait en fait toutes les transitions possibles
         // collecter les actions terminales pour les distinguer des autres
-        SetTermPtr legal_non_terminal_moves; // actions légales non terminales dans la position courante
-        SetTermPtr legal_non_always_terminal_moves; // actions légales pas toujours terminales dans cette position
-        // on met l'action terminale de score max de côté pour jouer une action terminale de score 100 si elle existe
-        TermPtr best_term = nullptr; // action terminale de score max
-        Score best_score_term = -1;  // le score max de la meilleure action terminale
-        // actions totalement explorées par tous les sous-jeux. chaque sous-jeu incrémente le compteur.
-        // si compteur == nb sous-jeux, cette action (NON TERMINALE) est totalement explorée
-//        std::map<TermPtr, int> fully_explored_moves;
-        // si une action a été marquée terminale ou parfois terminale, il faut vérifier si elle l'est dans le cas présent
-        // (si il y a une action non connue comme terminale, elle sera testée et marquée au moment de la rétro-propagation du score)
-        // pour chaque action supposée terminale, on vérifie si elle l'est dans la position globale courante en la jouant
-        for (int s = 0; s < cnode.size(); s++) {
-            for (SubLinkPtr c : cnode[s]->childs) {
-                for (auto& entry : c->moves_explored) {
-                    // on la cherche dans les actions légales.
-                    auto it_set_legals = set_legals.find(entry.first);
-                    bool to_check = it_set_legals != set_legals.end(); // c'est une action légale ?
-                    bool checked = legal_non_terminal_moves.find(entry.first) != legal_non_terminal_moves.end(); // elle est déjà traitée ?
-                    if (to_check || checked) {
-                        // c'est une action potentiellement terminale : on vérifie si elle est bien terminale ou pas
-                        if ( (entry.second & SubLink::SOMETIME_TERMINAL) == SubLink::SOMETIME_TERMINAL) {
-                            // c'est une action légale pas encore vérifiée
-                            if (to_check) {
-                                VectorBool next = current;
-                                circuit.setMove(next, entry.first); // on joue l'action
-                                circuit.next(next);
-                                // cette action a été marquée terminale, mais elle ne l'est pas toujours.
-                                if (!circuit.isTerminal(next)) {
-                                    legal_non_terminal_moves.insert(entry.first);
-                                    // si elle était considérée toujours terminale, on rectifie le marquage
-                                    if (entry.second == SubLink::TERMINAL) {
-                                        entry.second = SubLink::SOMETIME_TERMINAL;
-                                        c->next_node->terminal = false;
-                                        update_depth[s] = descent_node.size()-1;
-                                    }
-                                    assert(!c->next_node->terminal);
-                                } else { // cette action est bien terminale, quel est le score ?
-                                    // récupérer le score
-                                    Score s = circuit.getGoal(next, role);
-                                    if (s > best_score_term) {
-                                        best_score_term = s;
-                                        best_term = entry.first;
-                                    }
-                                }
-                                // cette action légale est testée, inutile de le refaire
-                                set_legals.erase(it_set_legals);
-                            }
-                            // c'est une action légale déjà vérifiée comme non terminale ?
-                            // si elle était considérée toujours terminale, on rectifie le marquage
-                            else {
-                                if ((entry.second & SubLink::TERMINAL) == SubLink::TERMINAL) {
-                                    entry.second = SubLink::SOMETIME_TERMINAL;
-                                    c->next_node->terminal = false;
-                                    update_depth[s] = descent_node.size()-1;
-                                }
-                                assert(!c->next_node->terminal);
-                            }
-                            // finalement cette action n'est pas toujours terminale, on le note
-                            if (entry.second == SubLink::SOMETIME_TERMINAL) {
-                                legal_non_always_terminal_moves.insert(entry.first);
-                                assert(!c->next_node->terminal);
-                            }
-                        }
-                        // c'est une action totalement explorée
-//                        if ((entry.second & SubLink::EXPLORED) == SubLink::EXPLORED)
-//                            fully_explored_moves[entry.first] += 1;
-                    }
-                }
-            }
-        }
-
-        // the rest of the legal moves are supposed non terminal
-        legal_non_always_terminal_moves.insert(set_legals.begin(), set_legals.end());
-        legal_non_terminal_moves.insert(set_legals.begin(), set_legals.end());
-
+        // TODO : et si on a marqué terminale une action qui ne l'est pas ? on peut marquer la branche totalement explorée et retourner un score moyen érroné...
+        SetTermPtr terminal_moves; // actions terminales
+        for (int s = 0; s < cnode.size(); s++)
+            for (SubLinkPtr c : cnode[s]->childs)
+                if (c->next_node->terminal)
+                    for (const auto& entry : c->moves_explored)
+                        if (entry.second && set_legals.find(entry.first) != set_legals.end())
+                            terminal_moves.insert(entry.first);
+        // collecter les actions légales non-terminales
+        SetTermPtr legal_moves;    // actions legales non terminales
+        for (TermPtr t : set_legals)
+            if (terminal_moves.find(t) == terminal_moves.end())
+                legal_moves.insert(t);
         // est-ce que toutes les transitions sont totalement explorées ?
         bool all_fully_explored = true;
         for (int s = 0; s < cnode.size(); s++) {
-            if (!cnode[s]->fullyExplored(legal_non_always_terminal_moves)) //  TODO : OPTIMISER EN LE CALCULANT EN MEME TEMPS QUE LES fully_explored_moves
+            if (!cnode[s]->fullyExplored(legal_moves))
                 all_fully_explored = false;
-            else if (cnode != root)
-                descent_link.back()[s]->moves_explored[descent_move.back()] |= SubLink::EXPLORED;
+            else if (cnode != root) // && !descent_link.back()[s]->moves_explored[descent_move.back()]
+                descent_link.back()[s]->moves_explored[descent_move.back()] = true;
             else if (cnode == root && !subgame_fully_explored[s]) {
                 cerr << "[selection] subgame " << s << " fully explored" << endl;
                 subgame_fully_explored[s] = true;
@@ -444,51 +359,76 @@ vector<vector<float>> UctSinglePlayerDecomp2::selection(vector<SubNodePtr> cnode
             }
         }
         if (all_fully_explored) {
-            if (cnode == root && !all_fully_explored) {
-                all_fully_explored = true;
+            if (cnode == root) {
                 cerr << "[selection] tous les sous-arbres completement explorés" << endl;
-                //assert(cnode != root);
-            } else {
-                // estimation du score exact moyen - ne pas retourner dans la branche explorée
-                vector<vector<float>> scores;
-                for (int s = 0; s < cnode.size(); s++) {
-                    vector<float> scores_local;
-                    float mean = 0;
-                    float mean_min = 0;
-                    float mean_max = 0;
-                    for (SubLinkPtr l : cnode[s]->childs) {
-                        mean += l->sum_score;
-                        mean_min += l->sum_min;
-                        mean_max += l->sum_max;
-                    }
-                    mean /= cnode[s]->visits;
-                    mean_min /= cnode[s]->visits;
-                    mean_max /= cnode[s]->visits;
-                    scores_local.push_back(mean);
-                    scores_local.push_back(mean_min);
-                    scores_local.push_back(mean_max);
-                    scores.push_back(scores_local);
-                }
-                return scores;
-                //return vector<vector<float>>();
+                exit(1);
             }
+            // estimation du score exact moyen
+            vector<vector<float>> scores;
+            for (int s = 0; s < cnode.size(); s++) {
+                vector<float> scores_local;
+                float mean = 0;
+                float mean_min = 0;
+                float mean_max = 0;
+                for (SubLinkPtr l : cnode[s]->childs) {
+                    mean += l->sum_score;
+                    mean_min += l->sum_min;
+                    mean_max += l->sum_max;
+                }
+                mean /= cnode[s]->visits;
+                mean_min /= cnode[s]->visits;
+                mean_max /= cnode[s]->visits;
+                scores_local.push_back(mean);
+                scores_local.push_back(mean_min);
+                scores_local.push_back(mean_max);
+                scores.push_back(scores_local);
+            }
+            return scores;
+            //return vector<vector<float>>();
         }
 
-
+        // on va collecter les meilleures actions légales pour chaque sous-jeu
+        // collecter les meilleures actions terminales
+        TermPtr best_term = nullptr;
+        Score best_score_term = -1;
+        for (auto it = terminal_moves.begin(); it != terminal_moves.end(); /* pas d'incrementation */) {
+            VectorBool next = current;
+            circuit.setMove(next, *it);
+            circuit.next(next);
+            //assert(circuit.isTerminal(next));
+            // TODO : A REVOIR, UN PEU MERDIQUE
+            // cette action a été marquée terminale, mais elle ne l'est pas toujours.
+            if (!circuit.isTerminal(next)) {
+                for (int s = 0; s < cnode.size(); s++) {
+                    SubLinkPtr c = cnode[s]->getChild(*it);
+                    c->next_node->terminal = false;
+                    c->moves_explored[*it] = false;
+                }
+                legal_moves.insert(*it);
+                it = terminal_moves.erase(it);
+                continue;
+            }
+            // récupérer le score
+            Score s = circuit.getGoal(next, role);
+            if (s > best_score_term) {
+                best_score_term = s;
+                best_term = *it;
+            }
+            if (s == 100) break;
+            it++;
+        }
         // si aucune action terminale ne rapporte 100 points il faut choisir la meilleure non terminale si il y en a une
         SetTermPtr best_of_all;
-        if (best_score_term < 100 && !legal_non_terminal_moves.empty()) {
+        if (best_score_term < 100 && !legal_moves.empty()) {
             // collecter les meilleures actions pour chaque sous-jeu
             SetTermPtr best_moves;
-            std::map<TermPtr, float> votes;
-            float best_vote = 0;
+            std::map<TermPtr, int> votes;
+            size_t best_vote = 0;
             for (int s = 0; s < cnode.size(); s++) {
-                SetTermPtr* best_local_moves;
-                SetTermPtr best_local_all;
-                SetTermPtr best_local_non_explored;
+            label:
+                SetTermPtr best_local_moves;
                 double best_score = -1;
-                double best_score_non_explored = -1;
-//                bool fully_explored = cnode[s]->fullyExplored(legal_non_terminal_moves); // TODO : OPTIMISER EN NE LE RECALCULANT PAS
+                bool fully_explored = cnode[s]->fullyExplored(legal_moves);
                 // pour chaque transition voir si elle possède les meilleures actions légales
                 for (SubLinkPtr c : cnode[s]->childs) {
                     //double a = (double) c->sum_score / c->visits;
@@ -500,112 +440,34 @@ vector<vector<float>> UctSinglePlayerDecomp2::selection(vector<SubNodePtr> cnode
                     //double a = (((double) c->sum_score + 3 * (float) c->sum_max) / 4 ) / c->visits;
                     double b = sqrt(log((double) cnode[s]->visits) / c->visits);
                     double score = a + 100 * uct_const * b;
-                    // pour chaque action : garder si elle est meilleure ou en fait partie
-                    for (const auto& entry : c->moves_explored) {
-                        // actions légale ?
-                        if (legal_non_terminal_moves.find(entry.first) != legal_non_terminal_moves.end()) {
-                            // garder les meilleurs actions legales et pas explorées
-                            if ((entry.second & SubLink::EXPLORED) != SubLink::EXPLORED) {
-                                // meilleur score ?
-                                if (score > best_score_non_explored) {
-                                    best_score_non_explored = score;
-                                    best_local_non_explored.clear();
-                                    best_local_non_explored.insert(entry.first);
-                                }
-                                // score égal ?
-                                else if (score == best_score_non_explored) {
-                                    best_local_non_explored.insert(entry.first);
-                                }
-                            }
-                            // garder les meilleurs actions legales (même explorées)
-                            else {
-                                // meilleur score ?
-                                if (score > best_score) {
-                                    best_score = score;
-                                    best_local_all.clear();
-                                    best_local_all.insert(entry.first);
-                                }
-                                // score égal ?
-                                else if (score == best_score) {
-                                    best_local_all.insert(entry.first);
-                                }
-                            }
+                    // garder les meilleurs actions si elles sont légales
+                    if (score > best_score) { // si meilleur score
+                        SetTermPtr best_legal;
+                        // collecte des actions actions légales
+                        // si l'action est legale et pas totalement explorée ou si elles le sont toutes
+                        for (const auto& entry : c->moves_explored)
+                            if (legal_moves.find(entry.first) != legal_moves.end() && (fully_explored || !entry.second))
+                               best_legal.insert(entry.first);
+                        // on remplace les meilleures si il y a des actions légales
+                        if (!best_legal.empty()) {
+                            best_score = score;
+                            best_local_moves.swap(best_legal);
                         }
+                    } else if (score == best_score) { // si score équivalent
+                        // on ajoute les actions aux meilleures si elles sont légales
+                        for (const auto& entry : c->moves_explored)
+                            if (legal_moves.find(entry.first) != legal_moves.end() && (fully_explored || !entry.second))
+                                best_local_moves.insert(entry.first);
                     }
-                    // de temps en temps on tire au sort les meilleurs parmi les explorées ou non
-                    best_local_moves = &best_local_non_explored;
-                    if (best_local_non_explored.empty()) best_local_moves = &best_local_all;
-                    else if (best_score > best_score_non_explored) {
-                        float randE = proba(rand_gen);
-                        if (randE < explored_choice) {
-                            best_local_moves = &best_local_all;
-                        }
-                    }
-
-//                    // garder les meilleurs actions si elles sont légales
-//                    if (score > best_score) { // si meilleur score
-//                        SetTermPtr best_legal;
-//                        // collecte des actions actions légales
-//                        // si l'action est legale et pas totalement explorée ou si elles le sont toutes
-//                        for (const auto& entry : c->moves_explored)
-//                            if (legal_non_terminal_moves.find(entry.first) != legal_non_terminal_moves.end() &&
-//                                (fully_explored || (entry.second & SubLink::EXPLORED) != SubLink::EXPLORED))
-//                               best_legal.insert(entry.first);
-//                        // on remplace les meilleures si il y a des actions légales
-//                        if (!best_legal.empty()) {
-//                            best_score = score;
-//                            best_local_moves.swap(best_legal);
-//                        }
-//                    } else if (score == best_score) { // si score équivalent
-//                        // on ajoute les actions aux meilleures si elles sont légales
-//                        for (const auto& entry : c->moves_explored)
-//                            if (legal_non_terminal_moves.find(entry.first) != legal_non_terminal_moves.end() &&
-//                                (fully_explored || (entry.second & SubLink::EXPLORED) != SubLink::EXPLORED))
-//                                best_local_moves.insert(entry.first);
-//                    }
                 }
                 // on vérifie qu'on a trouvé au moins une action légale
-                if (best_local_moves->empty()) {
+                if (best_local_moves.empty()) {
                     cerr << "[selection] no legal best move in subgame " << s << endl;
-                    cout << "selection: ";
-                    for (size_t i = 0; i < descent_move.size(); i++)
-                        cout << *descent_move[i] << " ";
-                    cout << endl;
-                    cout << "position courante: ";
-                    for (TermPtr t : circuit.getPosition(current))
-                        cout << *t << " ";
-                    cout << endl;
-                    cout << "actions legales: " << endl;
-                    for (TermPtr l : clegals) {
-                        SubLinkPtr c = cnode[s]->getChild(l);
-                        cout << *l << " status = " << (int) c->moves_explored[l] << endl;
-                    }
-                    assert(!best_local_moves->empty());
+                    exit(1);
                 }
                 // ajouter ces meilleures actions au vote global
-                for (TermPtr t : *best_local_moves) {
-                    // original, un vote standard : un point par action, chaque sous-jeu a un vote de même poids
+                for (TermPtr t : best_local_moves) {
                     votes[t]++;
-
-                    // donner plus de poids aux actions les plus testées pour encourager à jouer
-                    // dans les jeux avec un facteur de branchement plus faible.
-                    // effet inverse de celui recherché.  Comme il y a plus d'actions dans block que maze,
-                    // dans maze la transition correspondant au fait de jouer ailleurs est plus souvent visitée.
-                    // c->visits / cnode[s]->visits est donc important pour les actions qui consistent à jouer ailleurs.
-                    // On ne veut pas donner un vote différent pour les différentes actions du sous-jeu mais donner plus de poids au choix du sous-jeu.
-                    // Il faut donc donner juste un score qui dépend du facteur de branchement et du nombre de visites du noeud
-                    // (pour qu'un noeud avec un fort facteur de branchement mais souvent visité, donc bien évalué,
-                    //  permette de dire que le choix du sous-jeu est fiable)
-                    // SubLinkPtr c = cnode[s]->getChild(t);
-                    // votes[t] += c->visits / cnode[s]->visits;
-
-                    // pour éviter les problèmes dans Incredible (mouvements dans maze favorisés même quand le jeu est à une action de la fin)
-                    // si une action terminale de score non nul est écartée du choix, les votes ont tous le même poids.
-                    // if (best_score_term > 0)
-                    //    votes[t]++;
-                    // else
-                    //    votes[t] += cnode[s]->visits / cnode[s]->childs.size();
-
                     if (votes[t] > best_vote) {
                         best_vote = votes[t];
                         best_moves.clear();
@@ -618,44 +480,17 @@ vector<vector<float>> UctSinglePlayerDecomp2::selection(vector<SubNodePtr> cnode
             // vérification qu'on a bien trouvé les meilleures actions
             if (best_moves.empty()) {
                 cerr << "[selection] empty set of best moves" << endl;
-                assert(!best_moves.empty());
+                exit(1);
             }
-
-
-//            // si il y a plusieurs meilleures actions on choisira au hasard
-//            best_of_all.swap(best_moves);
-
-
-//            // si il y a plusieurs meilleures actions on choisi celle qui apporte la mailleure probabilité de score
-//            float best_proba = -1;
-//            for (TermPtr t : best_moves) {
-//                float proba = 1;
-//                for (int s = 0; s < cnode.size(); s++) {
-//                    SubLinkPtr c = cnode[s]->getChild(t);
-//                    proba *= ((float) c->sum_score / c->visits) / 100;
-//                }
-//                if (proba > best_proba) {
-//                    best_proba = proba;
-//                    best_of_all.clear();
-//                    best_of_all.insert(t);
-//                } else if (proba == best_proba) {
-//                    best_of_all.insert(t);
-//                }
-//            }
             // si il y a plusieurs meilleures actions on choisi celle qui apporte le meilleur espoir de gain et qui n'est pas totalement explorée
-            // on peut avoir un sous-jeu avec des actions totalement explorées mais pas toutes, les autres sous-jeux n'ont que des actions totalement
-            // explorées : une action recommandée peut donc être totalement explorée pour tous les sous-jeux.
             float best_proba = -1;
             for (TermPtr t : best_moves) {
                 float proba = 1;
                 bool fully_explored = true;
                 for (int s = 0; s < cnode.size(); s++) {
                     SubLinkPtr c = cnode[s]->getChild(t);
-                    if ((c->moves_explored[t] & SubLink::EXPLORED) != SubLink::EXPLORED) fully_explored = false;
-                    // si on a une conjonction de sous-buts
+                    if (!c->moves_explored[t]) fully_explored = false;
                     proba *= ((float) c->sum_score / c->visits) / 100;
-                    // si on a une disjonction de sous-buts
-                    // proba += ((float) c->sum_score / c->visits) / 100;
                 }
                 if (fully_explored) continue;
                 if (proba > best_proba) {
@@ -713,7 +548,7 @@ bool UctSinglePlayerDecomp2::expansion(vector<SubNodePtr>& cnode, SetTermPtr& un
         // on informe chaque enfant
         bool already_known = true;
         for (int s = 0; s < cnode.size(); s++) {
-            SubNodePtr n = cnode[s]->noteMoveResult(*it, getSubPos(next_pos, s), descent_node.size(), circuit.isTerminal(next), transpo[s], update_depth[s]);
+            SubNodePtr n = cnode[s]->noteMoveResult(*it, getSubPos(next_pos, s), descent_node.size(), circuit.isTerminal(next), transpo[s]);
             if (n != nullptr)
                 already_known = false;
         }
@@ -753,16 +588,15 @@ void UctSinglePlayerDecomp2::simul_backprop() {
     // pour chaque sous-jeu
     for (int s = 0; s < (int) subgames_trues.size(); s++) {
         // estimer l'espérance de gain lmin/lmax dans la sous-position correspondant au terminal
-        SetTermPtr lpos = getSubPos(pos, s);
-        Score lscore = score, lmin = 100, lmax = 0;
+        Score lmin = 100, lmax = 0;
         SubLinkPtr c = descent_link.back()[s]; // enfant du dernier noeud selectionné
-
         // la sous-position existe dans l'arbre et elle est évaluée
         if (last_terminal && c->max != -1) {
             lmax = c->max;
             lmin = c->min;
         } else {
             // sinon on evalue
+            SetTermPtr lpos = getSubPos(pos, s);
             VectorBool values(infos.values_size, UNDEF);
             values[0] = BOOL_T;
             for (TermPtr t : subgames_trues[s]) values[infos.inv_vars.at(t)] = BOOL_F;
@@ -790,74 +624,17 @@ void UctSinglePlayerDecomp2::simul_backprop() {
             }
         }
 
-//        // position terminale acec score supérieur à 0 ?
-//        if (last_terminal && score > 0) {
-//            // on regarde si on connaissait pas une position terminale aussi bien voir mieux à profondeur moindre
-//            // si oui, on remet à 0 le score et l'espoir de gain de cette position pour ne pas inciter à y revenir.
-//            size_t hash_ws = SubNode::computeHash(lpos);
-//            auto it = transpo_without_step[s].find(hash_ws);
-//            // si une position terminale identique existe à profondeur moindre avec un score supérieur ou égal
-//            if (it != transpo_without_step[s].end() && it->second.first->depth < c->next_node->depth && it->second.second >= score) {
-//                assert(it->second.first->pos == lpos);
-//                lscore = 0;
-//                lmax = 0;
-//                lmin = 0;
-////                cout << "position terminale identique déja trouvée à profondeur " << it->second.first->depth;
-////                cout << " (au lieu de " <<  c->next_node->depth << ") avec score = " << it->second.second << " au lieu de " << score << ")" << endl;
-//            }
-//            // sinon on crée ou remplace
-//            else if (it == transpo_without_step[s].end() || it->second.first->depth > c->next_node->depth || it->second.second < score){
-//                transpo_without_step[s][hash_ws] = std::pair<SubNodePtr, Score>(c->next_node, lscore);
-////                cout << "position terminale avec score = " << lscore << " trouvée à profondeur " << c->next_node->depth << endl;
-//            }
-//        }
-
         // on remonte chaque nœud
         for(int i = (int) descent_link.size()-1; i >= 0; i--) {
             // on récupère la position selectionnée et l'enfant correspondant au coup joué
             SubNodePtr n = descent_node[i][s];
             SubLinkPtr c = descent_link[i][s];
-
-//            // si la transition est totalement explorée on remonte la moyenne de la fratrie plutôt que le score de l'enfant
-//            if ((c->moves_explored[descent_move[i]] & SubLink::EXPLORED) == SubLink::EXPLORED) {
-//                float lscore = 0;
-//                float lmin = 0;
-//                float lmax = 0;
-//                for (SubLinkPtr child : c->next_node->childs) {
-//                    lscore += child->sum_score;
-//                    lmin += child->sum_min;
-//                    lmax += child->sum_max;
-//                }
-//                lscore /= n->visits;
-//                lmin /= n->visits;
-//                lmax /= n->visits;
-//            }
-
             // on augmente le nombre de visites du parent
             n->visits++;
             // on augmente le nombre de visites et on note le score de enfant
             c->visits++;
-            // rétro-propager les corrections de marquage
-            if (update_depth[s] > i) {
-//                // DEBUG
-//                if ((c->moves_explored[descent_move[i]] & SubLink::EXPLORED) ==  SubLink::EXPLORED) {
-//                    cout << "(update_depth[" << s << "]=" << update_depth[s] << ") - on rétropropage une modif à profondeur " << i << " à partir du noeud " << n << " vers le noeud " << c->next_node << " action jouée " << *descent_move[i];
-//                    cout << " avant=" << (int) c->moves_explored[descent_move[i]];
-//                    createGraphvizFile("uct_subtree_" + std::to_string(s) + "_" + std::to_string(iter_now) + "_avant", s);
-//                    c->moves_explored[descent_move[i]] &= SubLink::UNEXPLORED_MASK;
-//                    cout << " après=" << (int) c->moves_explored[descent_move[i]] << endl;
-//                    createGraphvizFile("uct_subtree_" + std::to_string(s) + "_" + std::to_string(iter_now) + "_après", s);
-//                    if (c->moves_explored.at(descent_move[i]) == 0b011){
-//                        for (size_t j = 0; j < descent_move.size(); j++)
-//                            cout << *descent_move[j] << "-" << (int) descent_link[j][s]->moves_explored.at(descent_move[j]) << " ";
-//                        cout << endl;
-//                    }
-//                }
-                c->moves_explored[descent_move[i]] &= SubLink::UNEXPLORED_MASK;
-                assert(c->moves_explored.at(descent_move[i]) != 0b011);
-            }
             // contribution du sous-jeu
-            c->sum_score += lscore;
+            c->sum_score += score;
             c->sum_min += lmin;
             c->sum_max += lmax;
         }
@@ -969,12 +746,11 @@ string UctSinglePlayerDecomp2::graphvizRepr(const string& name, int subgame) con
             int color = ((float) n->nbFullyExplored() / n->childs_moves.size() * 6) + 1;
             nodes << ", style=filled, fillcolor=" << color;
         }
-        if (n->terminal)
-            nodes << ", style=filled, fillcolor=7, color=blue, penwidth=3";
+        else if (n->terminal) nodes << ", style=filled, fillcolor=7";
         nodes << "]" << endl;
         for (SubLinkPtr c : n->childs) {
             links << "    " << (long long) n << " -> " << (long long) c->next_node;
-            links << " [label=\"Ni=" << c->visits << " Wi=" << c->sum_score << " Wi_min=" << c->sum_min << " Wi_max=" << c->sum_max << " max=" << c->max;
+            links << " [label=\"Ni=" << c->visits << " Wi=" << c->sum_score << " Wi_min=" << c->sum_min << " Wi_max=" << c->sum_max;
             links << " µ=" << std::fixed << std::setprecision(2) << ((float) c->sum_score/c->visits) << " ";
             links << " µ2=" << std::fixed << std::setprecision(2) << (((double) c->sum_score + (float) c->sum_max) / 2 ) / c->visits << " ";
             links << " f=" << c->nbFullyExplored() << "/" << c->moves_explored.size() << " ";

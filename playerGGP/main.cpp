@@ -63,11 +63,11 @@ void playDecomposeGdlFile(const char * filename) {
     // ----------
 
     int num_test = 100;
-    int itermax = 500000;
+    int itermax = 50000000;
     pair<bool, int> result;
 
     // TEST AVEC DECOMPOSITION 2 --------------------------------------------------------
-    out_time << "-----------------------------------------------------jeu avec decomposition" << endl;
+   out_time << "-----------------------------------------------------jeu avec decomposition" << endl;
     for (int n = 0; n < num_test; n++) {
         cout << "test " << n+1 << " " << std::flush;
         // TEST -----
@@ -93,7 +93,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct with decomp :                             solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct with decomp :                             fail (" << itermax << ")" << endl;
+            out_time << "Uct with decomp :                             fail" << endl;
         out_time << "Uct with decomp in                            ";
         out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
         out_time << "Uct with decomp total time :                  ";
@@ -136,7 +136,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct with decomp :                             solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct with decomp :                             fail (" << itermax << ")" << endl;
+            out_time << "Uct with decomp :                             fail" << endl;
         out_time << "Uct with decomp in                            ";
         out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
         out_time << "Uct with decomp total time :                  ";
@@ -166,7 +166,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct without decomp :                          solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct without decomp :                          fail (" << itermax << ")" << endl;
+            out_time << "Uct without decomp :                          fail" << endl;
         out_time << "Uct without decomp total time :               ";
         out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
         // ----------
@@ -193,7 +193,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct without decomp :                          solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct without decomp :                          fail (" << itermax << ")" << endl;
+            out_time << "Uct without decomp :                          fail" << endl;
         out_time << "Uct without decomp total time :               ";
         out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
         // ----------
@@ -221,7 +221,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct without decomp :                          solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct without decomp :                          fail (" << itermax << ")" << endl;
+            out_time << "Uct without decomp :                          fail" << endl;
         out_time << "Uct without decomp total time :               ";
         out_time << TIME_SPENT(total_time_start, total_time_end) << " seconds" << endl;
         // ----------
@@ -262,7 +262,7 @@ void playDecomposeGdlFile(const char * filename) {
         if (result.first)
             out_time << "Uct with decomp :                             solved (" << result.second << ")" << endl;
         else
-            out_time << "Uct with decomp :                             fail (" << itermax << ")" << endl;
+            out_time << "Uct with decomp :                             fail" << endl;
         out_time << "Uct with decomp in                            ";
         out_time << TIME_SPENT(time_start, time_end) << " seconds" << endl;
         out_time << "Uct with decomp total time :                  ";
@@ -302,48 +302,31 @@ int main(int argc, const char * argv[]) {
 
 
 
-//    playDecomposeGdlFile((test + "double_blocks_world.kif").c_str());
-//    playDecomposeGdlFile((test + "double_blocks_world_medium.kif").c_str());
-//    playDecomposeGdlFile((test + "double_blocks_world_small.kif").c_str());
-//    playDecomposeGdlFile((test + "double_blocks_world_very_small.kif").c_str());
-//    playDecomposeGdlFile((test + "double_maze.kif").c_str());
-
-
-//    playDecomposeGdlFile((base + "lightsOnSimul4_v0.kif").c_str());        // RESOLU EN 1 à 3 PLAYOUTS !!!
-//    playDecomposeGdlFile((base + "lightsOnSimultaneous_v0.kif").c_str());  // RESOLU EN 1 à 3 PLAYOUTS !!!
-
 //    playDecomposeGdlFile((base + "futoshiki4_v0.kif").c_str());
 //    playDecomposeGdlFile((stanford + "selectivesukoshi_v0.kif").c_str());
 //    playDecomposeGdlFile((base + "queens08lg_v0.kif").c_str());
+//
+    playDecomposeGdlFile((base + "incredible_v0.kif").c_str());
+//
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_1.kif").c_str()); // G 14sj
+    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_6.kif").c_str()); // max decomposable 22sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_4.kif").c_str()); // 13sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_3.kif").c_str()); // 12sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_2.kif").c_str()); // 11sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_5.kif").c_str()); // 10sj
 
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_3.kif").c_str()); // max decomposable 33sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_1.kif").c_str()); // 22sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_2.kif").c_str()); // 16sj
 
-
-    playDecomposeGdlFile((base + "blocksWorldParallel_v0.kif").c_str());
-
-//    playDecomposeGdlFile((base + "incredible_v0.kif").c_str());
-
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_1.kif").c_str()); // 14sj - G
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_6.kif").c_str()); // 22sj - damier
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_4.kif").c_str()); // 13sj - tetris
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_3.kif").c_str()); // 12sj - chien assis
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_2.kif").c_str()); // 11sj - iG
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_5x5_5.kif").c_str()); // 10sj - sorciere
-
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_3.kif").c_str()); // 33sj - damier clos
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_1.kif").c_str()); // 22sj - cube
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_6x6_2.kif").c_str()); // 16sj - canard
-
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_4.kif").c_str()); // 61sj - grand damier
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_3.kif").c_str()); // 37sj - halloween
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_1.kif").c_str()); // 12sj - cheval
-//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_2.kif").c_str()); // 10sj - chaos
-
-
-//    playDecomposeGdlFile((stanford + "multiplehamilton_v0.kif").c_str());
-//    playDecomposeGdlFile((stanford + "multiplesukoshi_v0.kif").c_str());
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_4.kif").c_str()); // max decomposable 61sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_3.kif").c_str()); // 37sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_1.kif").c_str()); // cheval 12sj
+//    playDecomposeGdlFile((user_home + "FAC/TH4_nonogramme/nng-decomp/kif/nonogram_10x10_2.kif").c_str()); // 10sj
 
 //    playDecomposeGdlFile((base + "asteroidsParallel_v1.kif").c_str());
-//    playDecomposeGdlFile((base + "factoringMutuallyAssuredDestruction_v0.kif").c_str());
+
+
 
 //    playDecomposeGdlFile((base + "ruleDepthLinear_v0.kif").c_str());
 //    playDecomposeGdlFile((dresden + "ruledepthlinear_v0.kif").c_str());

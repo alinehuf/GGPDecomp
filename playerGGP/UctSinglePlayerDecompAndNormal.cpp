@@ -435,7 +435,6 @@ bool UctSinglePlayerDecompAndNormal::selection(vector<Node4Ptr> cnode, Node4Ptr 
                         i++;
                     }
                     cout << "pas de noeud global completement exploré" << endl;
-                    exit(1);
                 }
                 // marquage localement
                 descent_move.back()[s]->fully_explored = true;
@@ -450,7 +449,7 @@ bool UctSinglePlayerDecompAndNormal::selection(vector<Node4Ptr> cnode, Node4Ptr 
         // une position totalement explorée globalement doit aussi l'être localement ?
         if (global_fully_explored && !all_fully_explored) {
             cout << "position totalement explorée globalement mais pas localement !" << endl;
-            exit(1);
+            ;
         }
         // completement exploré localement
         if (all_fully_explored) {

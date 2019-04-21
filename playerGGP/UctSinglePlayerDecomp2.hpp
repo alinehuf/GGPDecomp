@@ -19,10 +19,9 @@ typedef SubNode * SubNodePtr;
 
 class SubLink {
 public:
-    SubLink(TermPtr m, SubNodePtr n) : next_node(n), visits(0), sum_score(0), sum_min(0), sum_max(0), min(-1), max(-1) { moves_explored.emplace(m,TO_EXPLORE); };
+    SubLink(TermPtr m, SubNodePtr n) : next_node(n), visits(0), sum_score(0), sum_min(0), sum_max(0), min(-1), max(-1) { moves_explored.emplace(m,false); };
 private:
-    enum : char {TO_EXPLORE = 0b000, SOMETIME_TERMINAL = 0b001, TERMINAL = 0b111, EXPLORED = 0b100, UNEXPLORED_MASK = 0b011};
-    std::unordered_map<TermPtr, char> moves_explored;
+    std::unordered_map<TermPtr, bool> moves_explored;
     size_t visits;
     size_t sum_score;
     size_t sum_min;
@@ -44,10 +43,10 @@ class SubNode {
     pos(std::forward<SetTermPtr>(p)), depth(d), hash(h), visits(0), terminal(term) {};
     ~SubNode() { for (SubLinkPtr c : childs) delete c; }
 
-    static size_t computeHash(SetTermPtr p, size_t depth = 0);
+    static size_t computeHash(SetTermPtr p, size_t depth);
     SubLinkPtr getChild(TermPtr move) const;
     SetTermPtr getUnexplored(const VectorTermPtr& legals);
-    SubNodePtr noteMoveResult(TermPtr move, SetTermPtr&& pos, size_t depth, bool term, std::unordered_map<size_t, SubNodePtr>& transpo, size_t& update_d);
+    SubNodePtr noteMoveResult(TermPtr move, SetTermPtr&& pos, size_t depth, bool term, std::unordered_map<size_t, SubNodePtr>& transpo);
 
     bool fullyExplored(SetTermPtr legal); // toutes les actions légales sont totalement explorées
     int nbFullyExplored();
@@ -66,7 +65,7 @@ class SubNode {
 
 class UctSinglePlayerDecomp2 {
 public:
-    UctSinglePlayerDecomp2(Circuit& circ, std::vector<std::unordered_set<TermPtr>>&& sgt, float c = 0.4f, float e = 0.0f);
+    UctSinglePlayerDecomp2(Circuit& circ, std::vector<std::unordered_set<TermPtr>>&& sgt, float c = 0.4f);
     ~UctSinglePlayerDecomp2(){
         for (auto& t : transpo) { for (auto& e : t) delete e.second; } };
 
@@ -95,8 +94,6 @@ private:
     const std::vector<std::unordered_set<TermPtr>> subgames_trues;
     float uct_const;
     std::default_random_engine rand_gen;
-    std::uniform_real_distribution<float> proba;
-    float explored_choice;
 
     // variables
     std::vector<std::vector<bool>> subgame_mask;
@@ -107,10 +104,8 @@ private:
     std::vector<std::vector<SubNodePtr>> descent_node;
     std::vector<std::vector<SubLinkPtr>> descent_link;
     std::vector<TermPtr> descent_move;
-    std::vector<size_t> update_depth; // pour signaler une révision du marquage à rétropropager
 
     std::vector<std::unordered_map<size_t, SubNodePtr>> transpo;
-    std::vector<std::unordered_map<size_t, std::pair<SubNodePtr, Score>>> transpo_without_step; // position terminale avec un score > 0 sans tenir compte de la profondeur
     std::vector<bool> subgame_terminal;
     std::vector<bool> subgame_fully_explored;
     size_t nb_fully_explored;
@@ -118,7 +113,6 @@ private:
     //std::vector<bool> subgame_solved;
     //size_t nb_solved;
     Score found;
-    bool all_fully_explored;
     bool solution_found;
 };
 

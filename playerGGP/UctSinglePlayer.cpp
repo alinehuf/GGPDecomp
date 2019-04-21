@@ -47,27 +47,25 @@ pair<bool, int> UctSinglePlayer::run(int itermax) {
     // lance uct
     for(current_iter = 1; current_iter <= itermax; current_iter++) {
 #if PLAYERGGP_DEBUG == 2
-        if (current_iter % 10000 == 0) {
-            cout << "#";
-
-        }
+     if (current_iter % 10000 == 0) {
+        cout << "#";
+     }
 #endif
         selection();
         expansion();
         int score = simulation();
         backpropagate(score);
 
-#if PLAYERGGP_DEBUG == 2
-        if (current_iter % 1000 == 0 || solution_found) {
-            cout << "RUN =======================================" << current_iter << endl;
+#if PLAYERGGP_DEBUG == 3
+        if (solution_found) {
+            cout << "--------------------------" << endl;
             cout << "selection :" << endl;
             for (int i = 0; i < descent_nptr.size(); i++) {
-                cout << *descent_nptr[i]->childs[descent_mid[i]].move << endl;
+                cout << *descent_nptr[i]->childs[descent_mid[i]].move << " ";
             }
+            cout << endl;
             //            createGraphvizFile("uct_tree_" + std::to_string(i));
         }
-#endif
-#if PLAYERGGP_DEBUG == 3
         if (current_iter % 1000 == 0 || solution_found) {
             cout << "RUN =======================================" << current_iter << endl;
             cout << "-------------------------best moves :" << endl;
